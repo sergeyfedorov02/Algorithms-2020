@@ -2,6 +2,8 @@
 
 package lesson1
 
+import java.io.File
+
 /**
  * Сортировка времён
  *
@@ -62,8 +64,37 @@ fun sortTimes(inputName: String, outputName: String) {
  *
  * В случае обнаружения неверного формата файла бросить любое исключение.
  */
+
+// N - количество строк в исходном файле
+// Трудоемкость - O(NlogN)
+// Ресурсоемкость - O(N)
 fun sortAddresses(inputName: String, outputName: String) {
-    TODO()
+
+    val list = File(inputName).readLines()
+
+    val listOfStreets =
+        list.map {
+            //Проверка на правильность формата каждой входной строки
+            if (!it.matches(Regex("""\S+ \S+ - \S+ \d+"""))) throw IllegalArgumentException()
+            it.split(Regex(" - | (?=\\d)"))
+        }
+            // Группируем улицу и номер дома, образуя пару улица,дом to человек
+            .groupBy({ it[1] to it[2].toInt() }, { it[0] })
+            // сортировка людей по алфавиту (здесь из-за вложенной сортировки сложность становится логарифмической)
+            .map { (k, v) -> k to v.sortedBy { v -> v } }
+            //Сортировка по алфавиту названия улицы и по увеличению номера дома
+            .sortedWith(compareBy({ it.first.first }, { it.first.second }))
+
+    File(outputName).bufferedWriter().use { out ->
+
+        listOfStreets.forEach { v ->
+            run {
+                val s = String.format("%s %s - %s", v.first.first, v.first.second, v.second.joinToString())
+                out.write(s)
+                out.newLine()
+            }
+        }
+    }
 }
 
 /**
@@ -96,8 +127,15 @@ fun sortAddresses(inputName: String, outputName: String) {
  * 99.5
  * 121.3
  */
+
+// N - количество строк с температурами в исходном файле
+// Трудоемкость - O(N)
+// Ресурсоемкость - O(N)
 fun sortTemperatures(inputName: String, outputName: String) {
-    TODO()
+    val list = File(inputName).readLines().map { (it.replace(".", "").toInt() + 2730) }.toIntArray()
+    val result = countingSort(list, 7730).map { (it - 2730).toFloat() / 10 }
+        .joinToString("\n")
+    File(outputName).writeText(result)
 }
 
 /**
@@ -129,8 +167,32 @@ fun sortTemperatures(inputName: String, outputName: String) {
  * 2
  * 2
  */
+
+// N - количество строк с числами в исходном файле
+// Трудоемкость - O(N)
+// Ресурсоемкость - O(N)
 fun sortSequence(inputName: String, outputName: String) {
-    TODO()
+    var max = 0
+    var number = 0
+    val list = File(inputName).readLines()
+
+    //Проверка, пуст ли входной файл
+    if (list.isEmpty())
+        File(outputName).writeText(inputName)
+
+    list.groupBy { i -> i }.forEach { (key, value) ->
+        if (value.size >= max)
+            if (value.size > max) {
+                max = value.size
+                number = key.toInt()
+            } else if (key.toInt() < number) {
+                max = value.size
+                number = key.toInt()
+            }
+    }
+
+    val result = list.filter { it != "$number" } + List(max) { "$number" }
+    File(outputName).writeText(result.joinToString("\n"))
 }
 
 /**
