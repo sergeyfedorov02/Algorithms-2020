@@ -74,9 +74,43 @@ abstract class AbstractAlgorithmsTests {
     }
 
     fun longestCommonSubstring(longestCommonSubstring: (String, String) -> String) {
+
+        //краевые случаи
+        assertEquals("", longestCommonSubstring("", ""))
+        assertEquals("", longestCommonSubstring("з", ""))
+        assertEquals("", longestCommonSubstring("", "м"))
+
+
+        //особые случаи
+
+        //тест на поиск самой длинной общей подстроки, причем той,
+        // которая встречается в first раньше(пусть - 5 символов, свети - 5 символов)
+        assertEquals("пусть", longestCommonSubstring("пусть светит", "светил пусть"))
+
+        //поиск самой длиной подстроки
+        //сначала мы встретим - "мыло", а уже потом - "варен"
+        //У "варен" длина больше
+        assertEquals("варен", longestCommonSubstring("мыловарение", "варенье, мыло"))
+
+        //поиск самой длиной подстроки. состоящей из 1 символа
+        assertEquals("п", longestCommonSubstring("привет паша", "пока галя"))
+
+        //тест с использованием Разных регистров
+        assertEquals(" Те", longestCommonSubstring("пишу ТеСты", "Проверяю выполнение Тестов"))
+
+        //обычные тесты
         assertEquals("", longestCommonSubstring("мой мир", "я"))
         assertEquals("зд", longestCommonSubstring("здравствуй мир", "мы здесь"))
+        assertEquals(
+            " максимальный балл за ",
+            longestCommonSubstring(
+                "я хочу получить максимальный балл за эту задачу",
+                "я получу максимальный балл за данную задачу"
+            )
+        )
         assertEquals("СЕРВАТОР", longestCommonSubstring("ОБСЕРВАТОРИЯ", "КОНСЕРВАТОРЫ"))
+
+        //тест на производительность
         assertEquals(
             "огда ", longestCommonSubstring(
                 """
@@ -123,12 +157,22 @@ abstract class AbstractAlgorithmsTests {
     }
 
     fun calcPrimesNumber(calcPrimesNumber: (Int) -> Int) {
+
+        //краевые случаи
+        assertEquals(0, calcPrimesNumber(-10))
+        assertEquals(0, calcPrimesNumber(0))
         assertEquals(0, calcPrimesNumber(-1))
         assertEquals(0, calcPrimesNumber(1))
         assertEquals(1, calcPrimesNumber(2))
+
+        //обычные тесты
         assertEquals(2, calcPrimesNumber(4))
         assertEquals(4, calcPrimesNumber(10))
+        assertEquals(6, calcPrimesNumber(15))
         assertEquals(8, calcPrimesNumber(20))
+        assertEquals(25, calcPrimesNumber(100))
+
+        //тесты на производительность
         assertEquals(1000, calcPrimesNumber(7920))
         assertEquals(1229, calcPrimesNumber(10000))
         assertEquals(2262, calcPrimesNumber(20000))
