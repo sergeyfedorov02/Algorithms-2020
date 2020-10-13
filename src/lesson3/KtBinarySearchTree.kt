@@ -79,8 +79,111 @@ class KtBinarySearchTree<T : Comparable<T>> : AbstractMutableSet<T>(), Checkable
      *
      * Средняя
      */
+    /* Для решения данной задачи используем алгоритм из книги
+        "Алгоритмы: построение и анализ" от авторов: Т.Корпен, Ч.Лейзерсон, Р.Ривест
+            глава 13 Двоичные деревья поиска, пункт 13.3 Добавление и удаление элемента(стр 242)
+
+        Рассмотрим 3 случая
+            1) У узла вообще нет потомков
+            2) У узла есть только один потомок(левый или правый)
+            3) У узла есть оба потомка
+    */
+
+    // Вспомогательная функция для получения Родителя узла
+    private fun getParent(node: Node<T>): Node<T>? {
+        var parent: Node<T>? = null
+        var child = root
+
+        while (child != node) {
+            val x = child!!.value.compareTo(node.value)
+
+            if (x > 0) {
+                parent = child
+                child = child.left
+            } else {
+                parent = child
+                child = child.right
+            }
+        }
+        return parent
+    }
+
+    /* Данная функция требуется для реализации 3его случая, чтобы найти
+       следующий по значению элемент без левого потомка,
+       то есть при поиске будем брать правого потомка удаляемого узла и далее идти по его левой ветке
+    */
+    private fun findMinChildWithoutLeftChild(node: Node<T>): Node<T>? {
+
+        //Если у Узла нет правого потомка, то выводим null, так как это будет относиться ко 2му случаю
+        var min: Node<T>? = node.right ?: return null
+
+        var result = min
+
+        while (min!!.left != null) {
+            min = min.left
+            result = min
+
+        }
+
+        return result
+    }
+
     override fun remove(element: T): Boolean {
-        TODO()
+
+        val node = find(element)
+        if (node == null || element != node.value) return false
+        val z = root // для дебага
+
+        // Дополнительная функция, чтобы после удаления элемента
+        // установить связь между его родителем и новым элементом на позиции удаленного узла
+
+        fun change(nodeToChange: Node<T>?) {
+            val parent = getParent(node)
+
+            if (parent == null) {
+                root = nodeToChange
+            } else {
+                val result = parent.value.compareTo(element)
+
+                if (result > 0) {
+                    parent.left = nodeToChange
+                } else if (result < 0) {
+                    parent.right = nodeToChange
+                }
+            }
+        }
+
+        when {
+            // Покрывает 1ый случай и частично 2ой(когда нет левого потомка)
+            node.left == null -> change(node.right)
+
+            // Покрывает 2ой случай (когда нет правого потомка)
+            node.right == null -> change(node.left)
+
+            // Покрывает 3ий случай (есть оба потомка)
+            else -> {
+                val y = findMinChildWithoutLeftChild(node)
+                val parentY = getParent(y!!)
+
+                // Если первый правый потомок подходит, то это 2ой случай + присоединение левого потомка удаляемого Узла
+                if (parentY == node) {
+                    y.left = node.left
+                    change(node.right)
+                } else {
+
+                    //избавляемся от потомков Y (присоединяем их к родителю Y)
+                    parentY!!.left = y.right
+
+                    //Запоминаем потомков удаляемого узла и делаем их потомками нового узла (узла Y)
+                    y.left = node.left
+                    y.right = node.right
+                    change(y)
+                }
+            }
+        }
+
+        size--
+        return true
     }
 
     override fun comparator(): Comparator<in T>? =
