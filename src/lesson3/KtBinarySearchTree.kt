@@ -330,7 +330,7 @@ class KtBinarySearchTree<T : Comparable<T>> : AbstractMutableSet<T>(), Checkable
             }
 
             if (currentNode == null)
-                throw NoSuchElementException()
+                throw IllegalStateException()
 
             return currentNode!!.value
         }
