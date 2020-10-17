@@ -79,6 +79,7 @@ class KtBinarySearchTree<T : Comparable<T>> : AbstractMutableSet<T>(), Checkable
      *
      * Средняя
      */
+
     /* Для решения данной задачи используем алгоритм из книги
         "Алгоритмы: построение и анализ" от авторов: Т.Кормен, Ч.Лейзерсон, Р.Ривест
             глава 13 Двоичные деревья поиска, пункт 13.3 Добавление и удаление элемента(стр 242)
@@ -223,6 +224,53 @@ class KtBinarySearchTree<T : Comparable<T>> : AbstractMutableSet<T>(), Checkable
 
     inner class BinarySearchTreeIterator internal constructor() : MutableIterator<T> {
 
+        private var currentNode: Node<T>? = null
+        private var removeFlag = false
+
+        /*Дополнительная функция для поиска самого минимального элемента в дереве
+            Трудоемкость:
+                1)в худшем случае(когда дерево не сбалансировано) - O(N), где N - высота дерева
+                2)в лучшем случае(когда дерево сбалансировано) - O(logN), где N - высота дерева
+            Ресурсоемкость - O(1) */
+
+        private fun getMinNode(): Node<T>? {
+            if (root == null)
+                return null
+
+            var min: Node<T>? = root!!.left ?: return root
+            var result = min
+
+            while (min!!.left != null) {
+                min = min.left
+                result = min
+
+            }
+            return result
+        }
+
+        /* Дополнительная функция для поиска следующей вершины
+            Трудоемкость:
+                1)в худшем случае(когда дерево не сбалансировано) - O(N), где N - высота дерева
+                2)в лучшем случае(когда дерево сбалансировано) - O(logN), где N - высота дерева */
+
+        private fun getNextNode(currentNode: Node<T>?): Node<T>? {
+            if (currentNode == null)
+                return null
+
+            if (currentNode.right != null) {
+                return findMinChildWithoutLeftChild(currentNode)
+            }
+
+            var y = getParent(currentNode)
+            var node = currentNode
+
+            while (y != null && node == y.right) {
+                node = y
+                y = getParent(y)
+            }
+            return y
+        }
+
         /**
          * Проверка наличия следующего элемента
          *
@@ -233,9 +281,21 @@ class KtBinarySearchTree<T : Comparable<T>> : AbstractMutableSet<T>(), Checkable
          *
          * Средняя
          */
+
+        /* Трудоемксоть:
+                1) в худшем - O(N)
+                2) в лучшем - O(logN)
+           Ресурсоемкость - O(1)
+             */
+
         override fun hasNext(): Boolean {
-            // TODO
-            throw NotImplementedError()
+            if (removeFlag) {
+                return currentNode != null
+            }
+            if (currentNode == null) {
+                return root != null
+            }
+            return getNextNode(currentNode) != null
         }
 
         /**
@@ -251,9 +311,28 @@ class KtBinarySearchTree<T : Comparable<T>> : AbstractMutableSet<T>(), Checkable
          *
          * Средняя
          */
+
+        /* Трудоемксоть:
+                1) в худшем - O(N)
+                2) в лучшем - O(logN)
+            Ресурсоемкость - O(1)
+               */
+
         override fun next(): T {
-            // TODO
-            throw NotImplementedError()
+            if (removeFlag) {
+                removeFlag = false
+            } else {
+                currentNode = if (currentNode == null) {
+                    getMinNode()
+                } else {
+                    getNextNode(currentNode)
+                }
+            }
+
+            if (currentNode == null)
+                throw NoSuchElementException()
+
+            return currentNode!!.value
         }
 
         /**
@@ -268,9 +347,21 @@ class KtBinarySearchTree<T : Comparable<T>> : AbstractMutableSet<T>(), Checkable
          *
          * Сложная
          */
+
+        /* Трудоемксоть:
+                1) в худшем - O(N)
+                2) в лучшем - O(logN)
+           Ресурсоемкость - O(1)
+               */
+
         override fun remove() {
-            // TODO
-            throw NotImplementedError()
+            check(currentNode != null && !removeFlag)
+
+            val nextNode = getNextNode(currentNode)
+            this@KtBinarySearchTree.remove(currentNode!!.value)
+
+            removeFlag = true
+            currentNode = nextNode
         }
 
     }
