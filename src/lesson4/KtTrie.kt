@@ -75,6 +75,24 @@ class KtTrie : AbstractMutableSet<String>(), MutableSet<String> {
 
     inner class KtTrie internal constructor() : MutableIterator<String> {
 
+        /* Для решения данной задачи я ввел пару функций, которые будут искать следующее слово - getNextWord,
+        первое слово - getFirstWord у определенного потомка от root и также последнее - getLastWord.
+
+        Также были введены переменные, listOfCharsToNumberOfChild - список, который хранит вершину (ее чар) и
+        на каком потомке от этой вершины мы сейчас находимся.
+
+        numberOfRootChild - номер потомка, которого мы сейчас рассматриваем.
+        currentIndex - это индекс определенной вершины в listOfCharsToNumberOfChild, number которой надо уменьшить, тк произошло удаление.
+
+        Для реализации Iterator.remove() я ввел несколько доп функций:
+        1) removeWord - функция удаления слова из дерева
+        2) getCurrentIndex - для изменения переменной currentIndex
+        3) thisIsTheLastWordOfThisChild - функция, которая определяет, являтеся ли currentWord - последним словом в каком-то потомке,
+           она изменяет значение lastWordFlag.
+
+        Пусть N - высота дерева
+         */
+
         private var listOfCharsToNumberOfChild = mutableListOf<PairOfCharToNumber>()
         private var currentWord: String = ""
         private var removeFlag = false
@@ -123,12 +141,12 @@ class KtTrie : AbstractMutableSet<String>(), MutableSet<String> {
             }
         }
 
-        //Получение значения вершины(для удобства) - следует изменить/убрать при причесывании кода
+        //Получение значения вершины(для удобства)
         private fun getChar(node: Node, number: Int): Char {
             return node.children.toList()[number].first
         }
 
-        //Получение следующей вершины(для удобства) - следует изменить/убрать при причесывании кода
+        //Получение следующей вершины(для удобства)
         private fun getNode(node: Node, number: Int): Node {
             return node.children.toList()[number].second
         }
@@ -184,9 +202,9 @@ class KtTrie : AbstractMutableSet<String>(), MutableSet<String> {
          */
 
         /* Трудоемксоть:
-                1) в худшем -
-                2) в лучшем -
-           Ресурсоемкость -
+                1) в худшем - O(N), когда будет вызов getLastWord и длина этого слова будет равна N
+                2) в лучшем - O(1), когда не будет вызова getLastWord
+           Ресурсоемкость - O(1)
                */
 
         override fun hasNext(): Boolean {
@@ -208,9 +226,11 @@ class KtTrie : AbstractMutableSet<String>(), MutableSet<String> {
          */
 
         /* Трудоемксоть:
-                1) в худшем -
-                2) в лучшем -
-           Ресурсоемкость -
+                1) Когда будет вызов getFirstWord - O(N),
+                2) Когда будет вызов getNextWord,
+                    а длина currentWord будет равна длине следующего слова, и равна N - O(N)
+                3) в лучшем случае - O(1), когда removeFlag == true
+           Ресурсоемкость - O(1)
                */
 
         override fun next(): String {
@@ -306,20 +326,20 @@ class KtTrie : AbstractMutableSet<String>(), MutableSet<String> {
         }
 
         /* Трудоемксоть:
-                1) в худшем -
-                2) в лучшем -
-           Ресурсоемкость -
+                1) в худшем - O(N), когда придется выполнить все операции после check
+                2) в лучшем - O(1), когда функция дальше check не пойдет
+           Ресурсоемкость - O(1)
                */
 
         override fun remove() {
             check(currentWord.isNotEmpty() && !removeFlag)
 
-            val lastWordInThisChildOfRoot = getLastWord(numberOfRootChild)
+            val lastWordInThisChildOfRoot = getLastWord(numberOfRootChild) // O(N)
             val checkNumber = listOfCharsToNumberOfChild.filter { it.number > 1 }
-            lastWordFlag = thisIsTheLastWordOfThisChild()
+            lastWordFlag = thisIsTheLastWordOfThisChild() // O(N)
 
-            val nextWord = getNextWord(currentWord)
-            removeWord(currentWord)
+            val nextWord = getNextWord(currentWord) // O(N)
+            removeWord(currentWord) // O(N)
             removeFlag = true
 
             // Если мы полностью удаляем потомка от root -> глобальная переменная numberOfRootChild не должна поменяться(в getNextWord она поменялась)
