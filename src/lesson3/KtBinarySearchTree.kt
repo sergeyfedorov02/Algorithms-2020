@@ -358,7 +358,7 @@ class KtBinarySearchTree<T : Comparable<T>> : AbstractMutableSet<T>(), Checkable
             check(currentNode != null && !removeFlag)
 
             val nextNode = getNextNode(currentNode)
-            this@KtBinarySearchTree.remove(currentNode!!.value)
+            remove(currentNode!!.value)
 
             removeFlag = true
             currentNode = nextNode
