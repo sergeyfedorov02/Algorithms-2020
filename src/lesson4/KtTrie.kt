@@ -134,9 +134,8 @@ class KtTrie : AbstractMutableSet<String>(), MutableSet<String> {
                 }
                 return result
             } else {
-                var nextWord = ""
                 listOfCharsToNumberOfChild = listOfCharsToNumberOfChild.dropLast(1).toMutableList()
-                listOfCharsToNumberOfChild.forEach { nextWord += it.char }
+                val nextWord = listOfCharsToNumberOfChild.fold("", { total, it -> total + it.char })
                 return getNextWord(nextWord)
             }
         }
