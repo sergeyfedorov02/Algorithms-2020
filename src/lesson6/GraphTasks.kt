@@ -114,8 +114,73 @@ fun Graph.largestIndependentVertexSet(): Set<Graph.Vertex> {
  *
  * Ответ: A, E, J, K, D, C, H, G, B, F, I
  */
+
+//Дополнительный класс для поиска максимального пути начиная с определенной вершины
+private class PathSearch(private val graph: Graph) {
+
+    private var currentPath = mutableListOf<Graph.Vertex>()
+    private var longestPath = Path()
+
+    //Создание Path из списка вершин
+    private fun getPath(list: List<Graph.Vertex>): Path {
+
+        val result = Path(list.first())
+        return list.drop(1).fold(result, { total, it -> Path(total, graph, it) })
+    }
+
+    // Обход графа начиная с node
+    private fun visit(node: Graph.Vertex) {
+
+        currentPath.add(node)
+
+        graph.getNeighbors(node).forEach {
+            if (!currentPath.contains(it)) {
+                visit(it)
+            }
+        }
+
+        if (currentPath.size - 1 > longestPath.length) {
+            longestPath = getPath(currentPath)
+        }
+
+        currentPath.removeAt(currentPath.size - 1)
+    }
+
+    //Поиск максимального пути в графе с указанного node
+    fun search(node: Graph.Vertex): Path {
+        currentPath.clear()
+        longestPath = Path()
+        visit(node)
+        return longestPath
+    }
+
+}
+
+/*
+Пусть N - количество вершин в графе
+      M - количество ребер в графе
+Трудоемкость - O(N*M)
+Ресурсоемкость - O(N)
+ */
 fun Graph.longestSimplePath(): Path {
-    TODO()
+
+    var result = Path()
+
+    //Трудоемкость O(N) - данная трудоемкость относится именно к строке forEach (тут мы пробегаемся по всем вершинам графа)
+
+    //А внутри forEach из-за использования класса PathSearch,
+    //общая трудоемкость станет O (N * M) - (тут уже от определенной вершины мы бежим по ребрам)
+    vertices.forEach {
+
+        // использование класса, трудоемкость которого - O(M)
+        val g = PathSearch(this)
+        val longestFromVertex = g.search(it)
+        if (longestFromVertex.length > result.length) {
+            result = longestFromVertex
+        }
+    }
+
+    return result
 }
 
 /**

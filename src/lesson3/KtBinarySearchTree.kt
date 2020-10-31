@@ -150,15 +150,19 @@ class KtBinarySearchTree<T : Comparable<T>> : AbstractMutableSet<T>(), Checkable
         return result
     }
 
+    override fun remove(element: T): Boolean {
+        val node = find(element)
+        if (node == null || element != node.value) return false
+
+        return remove(node)
+    }
+
     /*
     Трудоемкость - O(N) - в худшем случае
     Трудоемкость - O(log(N)) - в лучшем случае
     Ресурсоемкость - O(1)
     */
-    override fun remove(element: T): Boolean {
-
-        val node = find(element)
-        if (node == null || element != node.value) return false
+    private fun remove(node: Node<T>): Boolean {
 
         /* Дополнительная функция, чтобы после удаления элемента
            установить связь между его родителем и новым элементом на позиции удаленного узла
@@ -173,7 +177,7 @@ class KtBinarySearchTree<T : Comparable<T>> : AbstractMutableSet<T>(), Checkable
             if (parent == null) {
                 root = nodeToChange
             } else {
-                val result = parent.value.compareTo(element)
+                val result = parent.value.compareTo(node.value)
 
                 if (result > 0) {
                     parent.left = nodeToChange
@@ -237,15 +241,8 @@ class KtBinarySearchTree<T : Comparable<T>> : AbstractMutableSet<T>(), Checkable
             if (root == null)
                 return null
 
-            var min: Node<T>? = root!!.left ?: return root
-            var result = min
+            return find(first())
 
-            while (min!!.left != null) {
-                min = min.left
-                result = min
-
-            }
-            return result
         }
 
         /* Дополнительная функция для поиска следующей вершины
@@ -358,7 +355,7 @@ class KtBinarySearchTree<T : Comparable<T>> : AbstractMutableSet<T>(), Checkable
             check(currentNode != null && !removeFlag)
 
             val nextNode = getNextNode(currentNode)
-            remove(currentNode!!.value)
+            remove(currentNode!!)
 
             removeFlag = true
             currentNode = nextNode

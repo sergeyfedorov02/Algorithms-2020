@@ -261,6 +261,32 @@ abstract class AbstractGraphTests {
     }
 
     fun longestSimplePath(longestSimplePath: Graph.() -> Path) {
+
+        //Мой тест, в котором longestSimplePath будет не при первой вершине
+        //          B
+        //          |
+        //    F --- D --- C
+        //    |     |     |
+        //    ----- E     K
+        //Ответ будет содержать вершины - K,C,D,F,E (length == 4)
+        val myGraph = GraphBuilder().apply {
+            val b = addVertex("B")
+            val d = addVertex("D")
+            val f = addVertex("F")
+            val c = addVertex("C")
+            val e = addVertex("E")
+            val k = addVertex("K")
+            addConnection(b, d)
+            addConnection(d, f)
+            addConnection(d, e)
+            addConnection(d, c)
+            addConnection(f, e)
+            addConnection(c, k)
+        }.build()
+        val longestMyPath = myGraph.longestSimplePath()
+        assertEquals(4, longestMyPath.length)
+
+        //Тесты на краевые случаи
         val emptyGraph = GraphBuilder().build()
         assertEquals(0, emptyGraph.longestSimplePath().length)
 
@@ -272,6 +298,7 @@ abstract class AbstractGraphTests {
         val longestNoEdgePath = noEdgeGraph.longestSimplePath()
         assertEquals(0, longestNoEdgePath.length)
 
+        //Тест на граф с несвязными вершинами
         val unconnected = GraphBuilder().apply {
             val a = addVertex("A")
             val b = addVertex("B")
@@ -285,6 +312,7 @@ abstract class AbstractGraphTests {
         val longestUnconnectedPath = unconnected.longestSimplePath()
         assertEquals(2, longestUnconnectedPath.length)
 
+        //Тест на циклический граф
         val graph = GraphBuilder().apply {
             val a = addVertex("A")
             val b = addVertex("B")
@@ -296,6 +324,7 @@ abstract class AbstractGraphTests {
         val longestPath = graph.longestSimplePath()
         assertEquals(2, longestPath.length)
 
+        //Тесты на производительность
         val graph2 = GraphBuilder().apply {
             val a = addVertex("A")
             val b = addVertex("B")
