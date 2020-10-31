@@ -173,8 +173,8 @@ fun Graph.longestSimplePath(): Path {
     vertices.forEach {
 
         // использование класса, трудоемкость которого - O(M)
-        val g = PathSearch(this)
-        val longestFromVertex = g.search(it)
+        val pathSearch = PathSearch(this)
+        val longestFromVertex = pathSearch.search(it)
         if (longestFromVertex.length > result.length) {
             result = longestFromVertex
         }
