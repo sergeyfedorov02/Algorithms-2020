@@ -2,6 +2,7 @@ package lesson6
 
 import lesson6.impl.GraphBuilder
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
 
 abstract class AbstractGraphTests {
@@ -184,6 +185,30 @@ abstract class AbstractGraphTests {
     }
 
     fun largestIndependentVertexSet(largestIndependentVertexSet: Graph.() -> Set<Graph.Vertex>) {
+
+        //Мой тест для проверки графа на ацикличность
+        //должно произойти throw IllegalArgumentException()
+
+        //    A --- B --- E
+        //          |     |
+        //          C --- D
+
+        val myGraph = GraphBuilder().apply {
+            val a = addVertex("A")
+            val b = addVertex("B")
+            val c = addVertex("C")
+            val d = addVertex("D")
+            val e = addVertex("E")
+            addConnection(a, b)
+            addConnection(b, c)
+            addConnection(b, e)
+            addConnection(c, d)
+            addConnection(d, e)
+        }.build()
+        assertFailsWith<IllegalStateException> {
+            myGraph.largestIndependentVertexSet()
+        }
+
         val emptyGraph = GraphBuilder().build()
         assertTrue(emptyGraph.largestIndependentVertexSet().isEmpty())
         val simpleGraph = GraphBuilder().apply {

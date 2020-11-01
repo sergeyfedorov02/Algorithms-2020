@@ -90,8 +90,93 @@ fun Graph.minimumSpanningTree(): Graph {
  *
  * Эта задача может быть зачтена за пятый и шестой урок одновременно
  */
+
+//Дополнительный класс для поиска цикла в графе
+private class CheckGraph(private val graph: Graph) {
+
+    private var listOfNodes = mutableListOf<Graph.Vertex>()
+    var checkFlag: Boolean = false
+
+    //Проверка наличия цикла в графе начиная с вершины - node
+    fun containsCycle(node: Graph.Vertex) {
+
+        //Проверка на наличие цикла
+        if (listOfNodes.size > 1) {
+            val checkList = graph.getNeighbors(node)
+            checkList.remove(listOfNodes.last())
+
+            val filterCheckList = checkList.filter { !listOfNodes.contains(it) }
+
+            if (checkList.size != filterCheckList.size) {
+                checkFlag = true
+                return
+            }
+        }
+
+        listOfNodes.add(node)
+
+        //Переход к следующему потомку
+        graph.getNeighbors(node).forEach {
+            if (!listOfNodes.contains(it)) {
+                containsCycle(it)
+            }
+        }
+        listOfNodes.removeAt(listOfNodes.size - 1)
+    }
+}
+
+
+//Функция для поиска максимального независимого множества вершин, начиная с node
+private fun Graph.findSet(node: Graph.Vertex): Set<Graph.Vertex> {
+
+    val result = hashSetOf(node)
+    val curVertexes = hashSetOf<Graph.Vertex>()
+    curVertexes.addAll(vertices)
+    curVertexes.removeAll(getNeighbors(node) + node)
+
+    while (curVertexes.isNotEmpty()) {
+
+        val element = curVertexes.first()
+        result.add(element)
+        val neighbors = getNeighbors(element)
+        curVertexes.removeAll(neighbors + element)
+    }
+
+    return result
+}
+
+/*
+Пусть N - количество вершин в графе
+      M - количество ребер в графе
+Трудоемкость - O(N*M)
+Ресурсоемкость - O(N)
+ */
 fun Graph.largestIndependentVertexSet(): Set<Graph.Vertex> {
-    TODO()
+
+    //Если граф пуст, то выводим пустой set
+    if (vertices.isEmpty())
+        return setOf()
+
+    //Проверка графа на ацикличность
+    //Трудоемкость - O(N)
+    val checkGraph = CheckGraph(this)
+    checkGraph.containsCycle(vertices.first())
+    check(!checkGraph.checkFlag)
+
+
+    //Поиск максимального независимого множества вершин, начиная с node
+    //Трудоемкость - O(N*M), тк в forEach будем пробегаться по каждой вершине - O(N),
+    //а для каждой вершины будем бежать по ребрам - O(M)
+
+    var result: Set<Graph.Vertex> = setOf()
+
+    vertices.forEach {
+        val answer = findSet(it)
+        if (answer.size > result.size)
+            result = answer
+    }
+
+    return result
 }
 
 /**
