@@ -204,6 +204,8 @@ class Runner(
 Ссылка на сайт с описанием алгоритма: https://habr.com/ru/post/105302/\
 
 Выкладываю тестовый вариант без оценкии трудоемкости ресурсоемкости
+Трудоемкость - O()
+Ресурсоемкость - O()
  */
 fun Graph.findVoyagingPathHeuristics(vararg parameters: Any): Path {
 
