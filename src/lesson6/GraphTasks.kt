@@ -147,8 +147,7 @@ private fun Graph.findSet(node: Graph.Vertex): Set<Graph.Vertex> {
 
 /*
 Пусть N - количество вершин в графе
-      M - количество ребер в графе
-Трудоемкость - O(N*M)
+Трудоемкость - O(N^2)
 Ресурсоемкость - O(N)
  */
 fun Graph.largestIndependentVertexSet(): Set<Graph.Vertex> {
@@ -165,8 +164,8 @@ fun Graph.largestIndependentVertexSet(): Set<Graph.Vertex> {
 
 
     //Поиск максимального независимого множества вершин, начиная с node
-    //Трудоемкость - O(N*M), тк в forEach будем пробегаться по каждой вершине - O(N),
-    //а для каждой вершины будем бежать по ребрам - O(M)
+    //Трудоемкость - O(N^2), тк в forEach будем пробегаться по каждой вершине - O(N),
+    //а для каждой вершины будем бежать по оставшимся вершинам - O(N) будет в худшем случае, когда ни одна вершина не имеет связей вообще
 
     var result: Set<Graph.Vertex> = setOf()
 
@@ -243,8 +242,7 @@ private class PathSearch(private val graph: Graph) {
 
 /*
 Пусть N - количество вершин в графе
-      M - количество ребер в графе
-Трудоемкость - O(N*M)
+Трудоемкость - O(N^2)
 Ресурсоемкость - O(N)
  */
 fun Graph.longestSimplePath(): Path {
@@ -254,10 +252,10 @@ fun Graph.longestSimplePath(): Path {
     //Трудоемкость O(N) - данная трудоемкость относится именно к строке forEach (тут мы пробегаемся по всем вершинам графа)
 
     //А внутри forEach из-за использования класса PathSearch,
-    //общая трудоемкость станет O (N * M) - (тут уже от определенной вершины мы бежим по ребрам)
+    //общая трудоемкость станет O (N^2) - (тут уже от определенной вершины мы бежим по ребрам к следующим вершинам)
     vertices.forEach {
 
-        // использование класса, трудоемкость которого - O(M)
+        // использование класса, трудоемкость которого - O(N)
         val pathSearch = PathSearch(this)
         val longestFromVertex = pathSearch.search(it)
         if (longestFromVertex.length > result.length) {

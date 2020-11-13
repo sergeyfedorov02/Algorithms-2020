@@ -63,6 +63,7 @@ private class Ant(
     private fun getNextNode(): Graph.Vertex? {
 
         //применение формулы и расчет привлекательности nextNode
+        //Трудоемкость - O(N), если граф полносвязный
         fun nodeSelectionProbability(nextNode: Graph.Vertex): Double {
 
             //Доп функция для вычисления произведения количества феромонов * привлекательность ребра (числитель формулы)
@@ -87,6 +88,7 @@ private class Ant(
         }
 
         //Выбор следующей вершины
+        //Трудоемкость - O(N), в худшем случае, когда граф полносвязный
         var random = ThreadLocalRandom.current().nextDouble(0.0, 1.0)
         val unvisitedNeighbors =
             graph.getNeighbors(currentNode).filter { it !in visitedNodes }
@@ -95,6 +97,7 @@ private class Ant(
             return null
         }
 
+        //Трудоемкость - O(N), в худшем случае, когда граф полносвязный и visitedNodes пуст
         for (i in 0 until unvisitedNeighbors.size - 1) {
 
             val currentNeighbor = unvisitedNeighbors[i]
@@ -117,11 +120,14 @@ private class Ant(
     }
 
     //Путешествие муравья по графу и поиск path
+    //Трудоемкость - O(N^2)
     fun findPath(): Path? {
 
+        //Трудоемкость - O(N^2)
         while (visitedNodes.size != graph.vertices.size - 1) {
 
             //если муравей попал в тупик
+            //Трудоемкость - O(N)
             val nextNode = getNextNode() ?: return null
 
             visitedEdges.add(graph.getConnection(currentNode, nextNode)!!)
@@ -131,7 +137,7 @@ private class Ant(
         }
 
         return if (firstNode !in graph.getNeighbors(currentNode))
-            null
+            null //Муравей не добрался до начальной вершины -> такой путь учитывать не надо
         else getPath(visitedNodes + currentNode + firstNode)
     }
 }
@@ -140,28 +146,34 @@ private class Ant(
 class Runner(
     private val graph: Graph,
 
-    //Контролируемый параметр количества обходов графа всеми муравьями
+    //Контролируемый параметр количества обходов графа всеми муравьями,
+    // где обход графа - это запуск муравья из каждой вершины графа
     private val size: Int = graph.vertices.size * 3,
     //Контролируемый параметр скорости испарения феромонов
     private val evaporationRate: Double = 0.5
 ) {
 
+    //Ресурсоемкость - O(K)
     private val pheromonesMap = mutableMapOf<Graph.Edge, Double>()
     private var path: Path? = null
 
-    fun run(): Path {
+    //Трудоемкость - O(N^3 * M)
+    fun run(): Path? {
 
         //Необходимое количество проходов по всем вершинам(подбирается вручную)
+        //Трудоемкость - O(M)
         for (i in 1..size) {
 
             val setOfVertexes = hashSetOf<Graph.Vertex>()
             setOfVertexes.addAll(graph.vertices)
 
             //Запуск муравьев изо всех вершин графа по очереди
+            //Трудоемкость - O(N^3)
             while (setOfVertexes.isNotEmpty()) {
                 val currentNode = setOfVertexes.first()
 
-                val ant = Ant(graph, currentNode, pheromonesMap = pheromonesMap)
+                val ant = Ant(graph, currentNode, pheromonesMap)
+                //Трудоемкость - O(N^2)
                 val currentPath = ant.findPath()
 
                 //Если муравей добрался до исходной вершины
@@ -186,10 +198,11 @@ class Runner(
             pheromonesMap.mapValues { (1.0 - evaporationRate) * it.value }
         }
 
-        return path!!
+        return path
     }
 
     //Функция для обновления таблицы феромонов (pheromonesMap)
+    //Трудоемкость - O(N)
     private fun renewalPheromoneMap(visitedEdges: MutableList<Graph.Edge>) {
 
         val weightOfTheDistanceTraveled = visitedEdges.sumBy { it.weight }
@@ -203,17 +216,19 @@ class Runner(
 /*
 Ссылка на сайт с описанием алгоритма: https://habr.com/ru/post/105302/\
 
-Выкладываю тестовый вариант без оценкии трудоемкости ресурсоемкости
-Трудоемкость - O()
-Ресурсоемкость - O()
+Пусть N - количество вершин
+      M - значение параметра size в классе Runner (число проходов по всем вершинами)
+      K - количество ребер
+
+Трудоемкость - O(N^3 * M)
+Ресурсоемкость - O(K), так как мы должны хранить pheromonesMap
  */
 fun Graph.findVoyagingPathHeuristics(vararg parameters: Any): Path {
 
-    //Проверка на Гамильтонов цикл
-    //Пока что не сделал
-
     val runner = Runner(this)
 
-    return runner.run()
+    //Проверка на наличие цикла Гамильтона
+    //Если цикла нет -> программа вернет пустой путь,
+    // так как ни один муравей не нашел пути обхода всего графа(не смог вернуться в исходную вершину)
+    return runner.run() ?: return Path()
 }
-

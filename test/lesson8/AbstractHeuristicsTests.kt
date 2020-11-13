@@ -60,6 +60,33 @@ abstract class AbstractHeuristicsTests {
             assertTrue(it in vertices, "Voyaging path $vertices must travel through all vertices!")
         }
 
+        //Мой тест для проверки графа на Гамильтоновость
+        //Так как тут нет цикла Гамильтона, то никакой из муравьев не доебрется обратно -> путь не будет найдет
+
+        //    A --- B --- E
+        //          |     |
+        //          C --- D
+
+        val myGraph = GraphBuilder().apply {
+            val b1 = addVertex("G")
+            val b2 = addVertex("H")
+            val b3 = addVertex("I")
+            val b4 = addVertex("J")
+            val b5 = addVertex("K")
+
+            addConnection(b1, b2, 10)
+
+            addConnection(b2, b3, 15)
+            addConnection(b2, b5, 20)
+
+            addConnection(b3, b4, 15)
+
+            addConnection(b4, b5, 10)
+        }.build()
+
+        val emptyPath = myGraph.findVoyagingPathHeuristics()
+        assertEquals(0, emptyPath.length)
+
         //Ссылка на сайт с графическим представлением данного теста: https://cutt.ly/Zg13eyz
         val expectedSet = mutableSetOf<Graph.Vertex>()
         val hamiltonianGraph = GraphBuilder().apply {
